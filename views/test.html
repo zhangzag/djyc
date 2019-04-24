@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>模拟点击遥控器</title>
+  <script>
+    !function(_window, _document) {
+      var _documentEle = _document.documentElement,
+        devicePixelRatio = _window.devicePixelRatio || 1;
+  
+      function count() {
+        // var _cwidth = _documentEle.clientWidth / 10;
+        var _cwidth = _documentEle.clientWidth / 3.75;
+        _documentEle.style.fontSize = _cwidth + "px";
+      };
+  
+      if (
+        function e(){ 
+          _document.body ? _document.body.style.fontSize = "16px" : _document.addEventListener("DOMContentLoaded", _window);
+        }(), 
+        count(), 
+        _window.addEventListener("resize", count), 
+        _window.addEventListener("pageshow", function(e) { _window.persisted && count() }), 
+        devicePixelRatio >= 2
+        ){
+        var createElementBody = _document.createElement("body"),
+          creareDiv = _document.createElement("div");
+        creareDiv.style.border = ".5px solid transparent", createElementBody.appendChild(creareDiv), _documentEle.appendChild(createElementBody), 1 === creareDiv.offsetHeight , _documentEle.removeChild(createElementBody);
+      };
+    }(window, document);
+  </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css">
+    <style>
+        body { font-size:0.14rem; }
+        .item { margin:0.2rem auto; width: 0.6rem;height:0.3rem;line-height:0.3rem;text-align:center;border:0.01rem solid #333;transition:all 0.3s ease-out; }
+        .item.cur { background-color: #1ff31f;color:#fff; }
+    </style>
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+</head>
+<body>
+  
+  <div id="app">
+    <div class="item" :class="{cur: curButton==item.button}" v-for="item of status" :key="item.id">{{item.content}}</div>  
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2.2.0/dist/socket.io.js"></script>
+  <script>
+    // socket.io引入成功后，可通过io()生成客户端所需的socket对象。
+    let socket = io('http://localhost:3002');
+
+    new Vue({
+        el: '#app',
+        data: {
+            message: 'Hello Vue!',
+            status: [
+                {content: 'A 前进', id: 1, button: 'A1'},
+                {content: 'A 后退', id: 2, button: 'A0'},
+                {content: 'B 前进', id: 3, button: 'B1'},
+                {content: 'B 后退', id: 4, button: 'B0'},
+            ],
+            curButton: 0,
+        },
+        created: function () {
+          // `this` 指向 vm 实例
+        //   console.log('message is: ' + this.message)
+        },
+        mounted() {
+          // socket.emmit()用户客户端向服务端发送消息，服务端与之对应的是socket.on()来接收信息。
+          socket.emit('client message', {msg:'我是电机客户端发来的消息'});
+
+          // socket.on()用于接收服务端发来的消息
+          socket.on('connect',  ()=>{
+            console.log('client connect server');
+
+            socket.on('server message', (data)=>{
+                console.log(`我是服务端发来的消息: `, data);// 我是服务端发来的消息
+            });
+
+            //web前端界面触发事件传递过来的数据
+            socket.on('toDjData', (data)=>{
+                /*
+                ** conten - 按钮内容
+                ** button - A 电机进 按钮：A1, A 电机退 按钮：A0, B 电机进 按钮：B1, B 电机退 按钮：B0
+                */
+                console.log(`web前端界面触发事件传递过来的数据: `, data);//{content: "A-前进", button: "A1"}
+                if( data && data.button ){
+                    this.curButton = data.button
+                }
+            });
+          });
+
+          socket.on('disconnect', ()=>{
+            console.log('client disconnect');
+          });
+
+          socket.on('reconnect_error', (error) => {
+            //链接出错了    
+            console.log('error', error)
+           });
+        },
+        methods: {
+            
+        },
+    })
+  </script>
+</body>
+</html>
