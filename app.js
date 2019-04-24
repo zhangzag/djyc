@@ -5,18 +5,25 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const koaBody = require('koa-body');
 const logger = require('koa-logger')
-const render = require('koa-art-template');
+// const render = require('koa-art-template');
+const views = require('koa-views');
 const path = require('path')
 
 
-render(app, {
-    root: path.join(__dirname, 'views'),
-    extname: '.html',
-    debug: process.env.NODE_ENV !== 'production',
-    imports: {
-    //   ...utils.moduleFuns,//模板工具类
-    }
-});
+// render(app, {
+//     root: path.join(__dirname, 'views'),
+//     extname: '.html',
+//     debug: process.env.NODE_ENV !== 'production',
+//     imports: {
+//     //   ...utils.moduleFuns,//模板工具类
+//     }
+// });
+app.use(views(__dirname + '/views', {
+    // map: {
+    //   html: 'underscore'
+    // }
+}));
+
 onerror(app)
 
 // logger
