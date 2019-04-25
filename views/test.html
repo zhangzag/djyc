@@ -67,20 +67,19 @@
             curButton: 0,
         },
         created: function () {
-          // `this` 指向 vm 实例
-        //   console.log('message is: ' + this.message)
+
         },
         mounted() {
           // socket.emmit()用户客户端向服务端发送消息，服务端与之对应的是socket.on()来接收信息。
-          socket.emit('client message', {msg:'我是电机客户端发来的消息'});
+          // socket.emit('client message', {msg:'我是电机客户端发来的消息'});
 
           // socket.on()用于接收服务端发来的消息
           socket.on('connect',  ()=>{
             console.log('client connect server');
 
-            socket.on('server message', (data)=>{
-                console.log(`我是服务端发来的消息: `, data);// 我是服务端发来的消息
-            });
+            // socket.on('server message', (data)=>{
+            //     console.log(`我是服务端发来的消息: `, data);// 我是服务端发来的消息
+            // });
 
             //web前端界面触发事件传递过来的数据
             socket.on('toDjData', (data)=>{
@@ -90,7 +89,13 @@
                 */
                 console.log(`web前端界面触发事件传递过来的数据: `, data);//{content: "A-前进", button: "A1"}
                 if( data && data.button ){
-                    this.curButton = data.button
+                  this.curButton = data.button;
+                  
+                  //操作成功返回提示数据 status=1 表示操作成功 status=0 表示操作出错了 。 msg为出错信息，可为空
+                  socket.emit('toWebData', { content: data.content, button: data.button, status: 1, msg: '' });
+                }else{
+                  //出错了
+                  socket.emit('toWebData', { content: data.content, button: data.button, status: 0, msg: '' });
                 }
             });
           });

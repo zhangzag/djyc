@@ -16,6 +16,11 @@ router.get(['/', '/index.html'], async (ctx, next) => {
   });
 })
 
+//错误页面
+router.get('/error', async (ctx)=>{
+  await ctx.render('error', {});
+})
+
 //测试模拟点击遥控器页面
 router.get('/test', async (ctx)=>{
   await ctx.render('test', {});
