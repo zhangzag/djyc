@@ -2,7 +2,7 @@ const router = require('koa-router')()
 
 
 //首页
-router.get(['/', '/index.html'], async (ctx, next) => {
+router.get(['/', '/index.html', '/djxt'], async (ctx, next) => {
     // ctx.body = '这是首要'
     
   // await ctx.render('index.html', {
@@ -17,7 +17,7 @@ router.get(['/', '/index.html'], async (ctx, next) => {
 })
 
 //错误页面
-router.get('/error', async (ctx)=>{
+router.get('/error_page', async (ctx)=>{
   await ctx.render('error', {});
 })
 

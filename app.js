@@ -25,7 +25,7 @@ app.use(views(__dirname + '/views', {
 }));
 
 //静态资源
-app.use(require('koa-static')(__dirname + '/assets', {
+app.use(require('koa-static')(__dirname + '../assets', {
     hidden: true,
     gzip: true,
   }))

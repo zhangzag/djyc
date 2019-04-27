@@ -96,7 +96,13 @@
     <!-- alert end -->
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2.2.0/dist/socket.io.js"></script>
   <script>
+    // socket.io引入成功后，可通过io()生成客户端所需的socket对象。
+    // let socket = io('http://localhost:3002');
+    // let socket = io('http://www.lingfencai.xyz');
+    let socket = io('47.106.246.12:3003');
+
     new Vue({
         el: '#app',
         data: {
@@ -121,24 +127,83 @@
           
         },
         mounted() {
+          // socket.emmit()用户客户端向服务端发送消息，服务端与之对应的是socket.on()来接收信息。
+          // socket.emit('client message', {msg:'我是客户端发来的消息'});
+
+          // socket.on()用于接收服务端发来的消息
+          socket.on('connect',  ()=>{
+            console.log('client connect server');
+            // socket.on('server message', (data)=>{
+            //     console.log(`我是服务端发来的消息: `, data);// 我是服务端发来的消息
+            // });
+            this.showLoad = false;
+
+            //提示连接上了
+            this.toastSucess.status = true;
+            this.toastSucess.content = '欢迎使用';
+
+            setTimeout(()=>{
+              this.toastSucess.status = false;
+              this.toastSucess.content = '已完成';
+            }, 1500);
+          });
+
+          //断开连接
+          socket.on('disconnect', ()=>{
+            console.log('client disconnect');
+          });
           
+          //连接socket出错了
+          socket.on('connect_error', (error) => {
+            console.log('连接出错了， ', error)
+            this.showLoad = false;
+            // alert('连接出错了')
+            this.alertDialog.status = true;
+            socket.close();
+          });
+
+          //监听电机返回的数据
+          socket.on('DjResponed', (data)=>{
+            console.log('电机返回的数据', data);//{content: "A-前进", button: "A1", status: 1, msg: ""}
+            if(data){
+              this.btnStatus.cur = data.status == 0?0 : data.button;
+              this.btnStatus.status = data.status;
+              this.btnStatus.msg = data.msg || this.btnStatus.msg;
+              // console.log(this.btnStatus)
+              
+              if( data.status == 0 ){
+                // 返回操作出错
+                alert(this.btnStatus.msg)
+              }
+            }else{
+              aler('操作出错了')
+            }
+          })
         },
         methods: {
           // A 前进
           goA (id){
-            
+            /*
+            ** conten - 按钮内容
+            ** button - A 电机进 按钮：A1, A 电机退 按钮：A0, B 电机进 按钮：B1, B 电机退 按钮：B0
+            */
+            this.btnStatus.cur = id;
+            socket.emit('webOptions', {content:'A-前进', button: 'A1'});
           },
           // A 后退
           backA (id){
-            
+            this.btnStatus.cur = id;
+            socket.emit('webOptions', {content:'A-后退', button: 'A0'});
           },
           // B 后退
           goB (id){
-            
+            this.btnStatus.cur = id;
+            socket.emit('webOptions', {content:'B-前进', button: 'B1'});
           },
           // B 后退
           backB (id){
-            
+            this.btnStatus.cur = id;
+            socket.emit('webOptions', {content:'B-后退', button: 'B0'});
           },
           //跳转连接出错页面
           goError (){
