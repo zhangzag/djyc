@@ -45,6 +45,7 @@
   <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
 </head>
 <body>
   
@@ -89,7 +90,7 @@
             <div class="weui-dialog__hd"><strong class="weui-dialog__title">{{ alertDialog.title }}</strong></div>
             <div class="weui-dialog__bd">{{ alertDialog.content }}</div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" @click="goError" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                <a href="javascript:;" @click="confirmBtn" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
             </div>
         </div>
     </div>
@@ -110,7 +111,7 @@
               content: '连接失败',
               title: '提示'
             },
-            showLoad: true,
+            showLoad: false,
             btnStatus: {
               cur: 0,
               status: 0,//1-操作成功， 2-操作失败
@@ -121,28 +122,101 @@
           
         },
         mounted() {
+          //提示连接上了
+          this.toastSucess.status = true;
+          this.toastSucess.content = '欢迎使用';
           
+          setTimeout(()=>{
+            this.toastSucess.status = false;
+            this.toastSucess.content = '已完成';
+          }, 1500);
         },
         methods: {
           // A 前进
           goA (id){
-            
+            axios.post('/djxt/move', { id })
+            .then( (response)=> {
+              console.log(response);
+              if( response.data.success ){
+                this.alertDialog.content = '操作成功';
+                this.alertDialog.status = true;
+              }else{
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+              }
+            })
+            .catch( (error)=> {
+              console.log(error);
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+            });
           },
           // A 后退
           backA (id){
+            axios.post('/djxt/move', { id })
+            .then( (response)=> {
+              console.log(response);
+              if( response.data.success ){
+                this.alertDialog.content = '操作成功';
+                this.alertDialog.status = true;
+              }else{
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+              }
+            })
+            .catch( (error)=> {
+              console.log(error);
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+            });
             
           },
           // B 后退
           goB (id){
+            axios.post('/djxt/move', { id })
+            .then( (response)=> {
+              console.log(response);
+              if( response.data.success ){
+                this.alertDialog.content = '操作成功';
+                this.alertDialog.status = true;
+              }else{
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+              }
+            })
+            .catch( (error) => {
+              console.log(error);
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+            });
             
           },
           // B 后退
           backB (id){
+            axios.post('/djxt/move', { id })
+            .then( (response) => {
+              console.log(response);
+              if( response.data.success ){
+                this.alertDialog.content = '操作成功';
+                this.alertDialog.status = true;
+              }else{
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+              }
+            })
+            .catch( (error) => {
+              console.log(error);
+                this.alertDialog.content = '操作失败了';
+                this.alertDialog.status = true;
+            });
             
           },
           //跳转连接出错页面
           goError (){
             window.location.replace('/error');
+          },
+          confirmBtn (){
+            this.alertDialog.status = false;
           },
         },
     })

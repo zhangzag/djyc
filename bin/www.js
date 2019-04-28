@@ -5,52 +5,40 @@ var http = require('http');
 
 var server = http.createServer(app.callback());
 
-const io = require('socket.io')(server)
-// const io = require('socket.io')(server, {
-//     path: '/djxtapi/',
-//     // serveClient: false,
-//     // below are engine.IO options
-//     // pingInterval: 10000,
-//     // pingTimeout: 5000,
-//     // cookie: false
-//   });
-// io.path('/djxtapi');
 
-server.listen(3002);
-// server.listen(3002, '192.168.1.104');
-// server.listen(3002, '47.106.246.12');
-// server.listen(3002, '172.18.150.217');
-// server.on('error', onError);
-// server.on('listening', onListening);
+//socket
+var net = require('net');
+// 服务器IP
+var HOST = '127.0.0.1';
+// var HOST = '192.168.1.104';
+// 端口号
+var PORT = 3004;
 
-// socket连接
-io.on('connection', (socket) => {
-    console.log('client connect server, ok!');
+// 创建一个TCP服务器实例，调用listen函数开始监听指定端口
+// 传入net.createServer()的回调函数将作为”connection“事件的处理函数
+// 在每一个“connection”事件中，该回调函数接收到的socket对象是唯一的
 
-    //监听断开连接状态：socket的disconnect事件表示客户端与服务端断开连接
-    socket.on('disconnect', () => {
-        console.log('user disconnected - 用户断开链接了');
-    });
+net.createServer(function(sock) {
+// 全局sock，可以在气其他地方调用
+global.sock = sock
+// 获得了一个socket连接，将客户端输出来
+console.log('CONNECTED: ' +
+    sock.remoteAddress + ':' + sock.remotePort);
 
-    // io.emit()方法用于向服务端发送消息，参数1表示自定义的数据名，参数2表示需要配合事件传入的参数
-    // io.emit('server message', {msg:'我是服务服务端'});
-
-    //来自前端页面的事件
-    socket.on('webOptions', (data)=>{
-        console.log('来自前端页面的事件: ', data);
-        //触发事件 通知电机遥控器
-        io.emit('toDjData', data)
-    });
-
-    //来自电机遥控器操作返回来的数据
-    socket.on('toWebData', (data)=>{
-        console.log('来自电机遥控器操作返回的结果数据： ', data)
-        //将电机响应数据传给微信界面
-        io.emit('DjResponed', data);
-    })
-
-    // socket.disconnect();
+// 为这个socket实例添加一个"data"事件处理函数，接收客户端数据
+sock.on('data', function(data) {
+    console.log('DATA ' + sock.remoteAddress + ': ' + data);
+    // 回发该数据，客户端将收到来自服务端的数据，实现ECHO服务器
+    // sock.write('' + data );
 });
 
+// 为这个socket实例添加一个"close"事件处理函数
+sock.on('close', function(data) {
+    console.log('CLOSED: ' +
+        sock.remoteAddress + ' ' + sock.remotePort);
+});
+
+}).listen(PORT, HOST);
 
 
+server.listen(3002);
